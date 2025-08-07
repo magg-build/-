@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营养师菜单推荐</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+      .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+      .fade-in { animation: fadeIn 0.5s ease-in; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      .slide-up { animation: slideUp 0.3s ease-out; }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 max-w-sm mx-auto relative overflow-x-hidden">
+  
+  <!-- 主页面 -->
+  <div id="homePage" class="min-h-screen">
+      <!-- 头部 -->
+      <div class="gradient-bg text-white p-6 rounded-b-3xl">
+          <div class="flex items-center justify-between mb-4">
+              <h1 class="text-2xl font-bold">营养师推荐</h1>
+              <i class="fas fa-user-md text-2xl"></i>
+          </div>
+          <p class="text-white/80">为您的家人定制健康饮食方案</p>
+      </div>
+
+      <!-- 家庭成员选择 -->
+      <div class="p-6 -mt-4">
+          <div class="bg-white rounded-2xl p-6 card-shadow mb-6">
+              <h2 class="text-lg font-semibold mb-4 text-gray-800">选择需要特殊照顾的家庭成员</h2>
+              <div class="grid grid-cols-2 gap-4">
+                  <div class="member-card bg-gradient-to-br from-pink-100 to-pink-200 p-4 rounded-xl cursor-pointer hover:shadow-lg transition-all" data-member="child">
+                      <div class="text-center">
+                          <i class="fas fa-child text-3xl text-pink-600 mb-2"></i>
+                          <p class="font-medium text-pink-800">儿童</p>
+                          <p class="text-sm text-pink-600">成长发育期</p>
+                      </div>
+                  </div>
+                  <div class="member-card bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-xl cursor-pointer hover:shadow-lg transition-all" data-member="elderly">
+                      <div class="text-center">
+                          <i class="fas fa-user-friends text-3xl text-blue-600 mb-2"></i>
+                          <p class="font-medium text-blue-800">老人</p>
+                          <p class="text-sm text-blue-600">健康养护期</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- 症状选择弹窗 -->
+  <div id="symptomModal" class="fixed inset-0 bg-black/50 hidden z-50">
+      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl slide-up">
+          <div class="p-6">
+              <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold" id="modalTitle">选择症状</h3>
+                  <button onclick="closeSymptomModal()" class="text-gray-400 hover:text-gray-600">
+                      <i class="fas fa-times text-xl"></i>
+                  </button>
+              </div>
+              <div id="symptomList" class="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                  <!-- 症状标签将动态生成 -->
+              </div>
+              <button onclick="showNutritionAnalysis()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-medium mt-6 hover:shadow-lg transition-all">
+                  获取营养建议
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <!-- 营养师分析页面 -->
+  <div id="analysisPage" class="min-h-screen hidden">
+      <div class="gradient-bg text-white p-6 rounded-b-3xl">
+          <div class="flex items-center justify-between mb-4">
+              <button onclick="goBack()" class="text-white">
+                  <i class="fas fa-arrow-left text-xl"></i>
+              </button>
+              <h1 class="text-xl font-bold">营养师分析</h1>
+              <div></div>
+          </div>
+      </div>
+
+      <div class="p-6 -mt-4">
+          <div class="bg-white rounded-2xl p-6 card-shadow mb-6 fade-in">
+              <div class="flex items-center mb-4">
+                  <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                      <i class="fas fa-user-md text-white text-xl"></i>
+                  </div>
+                  <div>
+                      <h3 class="font-semibold text-gray-800">专业营养师建议</h3>
+                      <p class="text-sm text-gray-500">基于症状的个性化分析</p>
+                  </div>
+              </div>
+              <div id="nutritionAdvice" class="text-gray-700 leading-relaxed">
+                  <!-- 营养建议内容 -->
+              </div>
+              <div class="mt-4">
+                  <h4 class="font-medium text-gray-800 mb-2">重点营养素</h4>
+                  <div id="keyNutrients" class="flex flex-wrap gap-2">
+                      <!-- 营养素标签 -->
+                  </div>
+              </div>
+          </div>
+
+          <button onclick="showMenuPlan()" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl font-medium hover:shadow-lg transition-all">
+              查看专属菜单
+          </button>
+      </div>
+  </div>
+
+  <!-- 菜单计划页面 -->
+  <div id="menuPage" class="min-h-screen hidden">
+      <div class="gradient-bg text-white p-6 rounded-b-3xl">
+          <div class="flex items-center justify-between mb-4">
+              <button onclick="goBackToAnalysis()" class="text-white">
+                  <i class="fas fa-arrow-left text-xl"></i>
+              </button>
+              <h1 class="text-xl font-bold">今日菜单</h1>
+              <div></div>
+          </div>
+          <div id="todayNutrition" class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+              <h3 class="font-medium mb-2">今日营养配比</h3>
+              <div class="flex justify-between text-sm">
+                  <span>蛋白质: 25g</span>
+                  <span>钙: 800mg</span>
+                  <span>维生素D: 10μg</span>
+              </div>
+          </div>
+      </div>
+
+      <div class="p-6 -mt-4">
+          <!-- 早餐 -->
+          <div class="bg-white rounded-2xl p-6 card-shadow mb-6 fade-in">
+              <div class="flex items-center mb-4">
+                  <i class="fas fa-sun text-2xl text-yellow-500 mr-3"></i>
+                  <h3 class="text-lg font-semibold text-gray-800">早餐</h3>
+              </div>
+              <div class="space-y-4">
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">牛奶燕麦粥</h4>
+                          <p class="text-sm text-gray-600 mb-2">富含钙质和优质蛋白</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">高钙</span>
+                              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">蛋白质</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">水煮蛋</h4>
+                          <p class="text-sm text-gray-600 mb-2">完整氨基酸补充</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">优质蛋白</span>
+                              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">维生素D</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- 午餐 -->
+          <div class="bg-white rounded-2xl p-6 card-shadow mb-6 fade-in">
+              <div class="flex items-center mb-4">
+                  <i class="fas fa-sun text-2xl text-orange-500 mr-3"></i>
+                  <h3 class="text-lg font-semibold text-gray-800">午餐</h3>
+              </div>
+              <div class="space-y-4">
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">清蒸鲈鱼</h4>
+                          <p class="text-sm text-gray-600 mb-2">DHA促进大脑发育</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">DHA</span>
+                              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">优质蛋白</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">菠菜豆腐汤</h4>
+                          <p class="text-sm text-gray-600 mb-2">钙铁双重补充</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">铁质</span>
+                              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">钙质</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- 晚餐 -->
+          <div class="bg-white rounded-2xl p-6 card-shadow mb-6 fade-in">
+              <div class="flex items-center mb-4">
+                  <i class="fas fa-moon text-2xl text-purple-500 mr-3"></i>
+                  <h3 class="text-lg font-semibold text-gray-800">晚餐</h3>
+              </div>
+              <div class="space-y-4">
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">小米粥</h4>
+                          <p class="text-sm text-gray-600 mb-2">易消化，养胃安神</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">B族维生素</span>
+                              <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">易消化</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="flex items-start space-x-4">
+                      <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=80&h=80&fit=crop&crop=center" 
+                           class="w-16 h-16 rounded-xl object-cover">
+                      <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">蒸蛋羹</h4>
+                          <p class="text-sm text-gray-600 mb-2">嫩滑易吸收</p>
+                          <div class="flex flex-wrap gap-1">
+                              <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">优质蛋白</span>
+                              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">易吸收</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script>
+      let selectedMember = '';
+      let selectedSymptoms = [];
+
+      // 症状数据
+      const symptomsData = {
+          child: [
+              { id: 'growth', name: '生长发育缓慢', color: 'bg-red-100 text-red-700' },
+              { id: 'appetite', name: '食欲不振', color: 'bg-orange-100 text-orange-700' },
+              { id: 'immunity', name: '免疫力低下', color: 'bg-yellow-100 text-yellow-700' },
+              { id: 'calcium', name: '缺钙症状', color: 'bg-blue-100 text-blue-700' },
+              { id: 'iron', name: '贫血倾向', color: 'bg-pink-100 text-pink-700' },
+              { id: 'digestion', name: '消化不良', color: 'bg-green-100 text-green-700' }
+          ],
+          elderly: [
+              { id: 'osteoporosis', name: '骨质疏松', color: 'bg-blue-100 text-blue-700' },
+              { id: 'hypertension', name: '高血压', color: 'bg-red-100 text-red-700' },
+              { id: 'diabetes', name: '糖尿病', color: 'bg-orange-100 text-orange-700' },
+              { id: 'constipation', name: '便秘问题', color: 'bg-green-100 text-green-700' },
+              { id: 'memory', name: '记忆力下降', color: 'bg-purple-100 text-purple-700' },
+              { id: 'weakness', name: '体力不足', color: 'bg-yellow-100 text-yellow-700' }
+          ]
+      };
+
+      // 营养建议数据
+      const nutritionAdviceData = {
+          child: {
+              advice: "针对儿童成长发育期，建议增加优质蛋白质摄入，如海鱼、鸡蛋等；补充钙质促进骨骼发育，如牛奶、豆制品；适量增加富含DHA的食物，促进大脑发育；确保维生素D充足，帮助钙质吸收。",
+              nutrients: ['优质蛋白', '钙质', 'DHA', '维生素D', '铁质']
+          },
+          elderly: {
+              advice: "针对老年人健康养护，建议增加多彩蔬菜摄入，补充抗氧化物质；适量优质蛋白质维持肌肉量；控制钠盐摄入，预防高血压；增加膳食纤维，改善肠道健康；补充钙质和维生素D，预防骨质疏松。",
+              nutrients: ['膳食纤维', '抗氧化物', '优质蛋白', '钙质', '维生素D']
+          }
+      };
+
+      // 选择家庭成员
+      document.querySelectorAll('.member-card').forEach(card => {
+          card.addEventListener('click', function() {
+              selectedMember = this.dataset.member;
+              showSymptomModal();
+          });
+      });
+
+      // 显示症状选择弹窗
+      function showSymptomModal() {
+          const modal = document.getElementById('symptomModal');
+          const title = document.getElementById('modalTitle');
+          const symptomList = document.getElementById('symptomList');
+          
+          title.textContent = selectedMember === 'child' ? '选择儿童症状' : '选择老人症状';
+          
+          // 生成症状标签
+          symptomList.innerHTML = '';
+          symptomsData[selectedMember].forEach(symptom => {
+              const symptomTag = document.createElement('div');
+              symptomTag.className = `symptom-tag p-3 rounded-xl cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all ${symptom.color}`;
+              symptomTag.dataset.symptomId = symptom.id;
+              symptomTag.innerHTML = `
+                  <div class="text-center">
+                      <p class="font-medium text-sm">${symptom.name}</p>
+                  </div>
+              `;
+              
+              symptomTag.addEventListener('click', function() {
+                  this.classList.toggle('border-purple-500');
+                  this.classList.toggle('shadow-lg');
+                  
+                  const symptomId = this.dataset.symptomId;
+                  if (selectedSymptoms.includes(symptomId)) {
+                      selectedSymptoms = selectedSymptoms.filter(id => id !== symptomId);
+                  } else {
+                      selectedSymptoms.push(symptomId);
+                  }
+              });
+              
+              symptomList.appendChild(symptomTag);
+          });
+          
+          modal.classList.remove('hidden');
+      }
+
+      // 关闭症状选择弹窗
+      function closeSymptomModal() {
+          document.getElementById('symptomModal').classList.add('hidden');
+      }
+
+      // 显示营养师分析
+      function showNutritionAnalysis() {
+          if (selectedSymptoms.length === 0) {
+              alert('请至少选择一个症状');
+              return;
+          }
+          
+          closeSymptomModal();
+          
+          // 填充营养建议内容
+          const adviceData = nutritionAdviceData[selectedMember];
+          document.getElementById('nutritionAdvice').textContent = adviceData.advice;
+          
+          const nutrientsContainer = document.getElementById('keyNutrients');
+          nutrientsContainer.innerHTML = '';
+          adviceData.nutrients.forEach(nutrient => {
+              const tag = document.createElement('span');
+              tag.className = 'px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-sm rounded-full';
+              tag.textContent = nutrient;
+              nutrientsContainer.appendChild(tag);
+          });
+          
+          // 切换到分析页面
+          document.getElementById('homePage').classList.add('hidden');
+          document.getElementById('analysisPage').classList.remove('hidden');
+      }
+
+      // 显示菜单计划
+      function showMenuPlan() {
+          document.getElementById('analysisPage').classList.add('hidden');
+          document.getElementById('menuPage').classList.remove('hidden');
+      }
+
+      // 返回功能
+      function goBack() {
+          document.getElementById('analysisPage').classList.add('hidden');
+          document.getElementById('homePage').classList.remove('hidden');
+      }
+
+      function goBackToAnalysis() {
+          document.getElementById('menuPage').classList.add('hidden');
+          document.getElementById('analysisPage').classList.remove('hidden');
+      }
+  </script>
+</body>
+</html>
